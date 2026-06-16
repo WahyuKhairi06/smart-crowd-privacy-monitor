@@ -24,7 +24,7 @@ def detect_faces(image: np.ndarray,
                  expand_head: bool = True,
                  expand_top_ratio: float = 0.6,
                  expand_lr_ratio: float = 0.15,
-                 iou_threshold: float = 0.3) -> List[Tuple[int, int, int, int]]:
+                 iou_threshold: float = 0.3) -> Tuple[List[Tuple[int, int, int, int]], float]:
     """
     Mendeteksi wajah pada gambar menggunakan Haar Cascade.
 
@@ -45,7 +45,7 @@ def detect_faces(image: np.ndarray,
         Daftar koordinat wajah (x, y, w, h).
     """
     if image is None:
-        return []
+        return [], 0.0
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.equalizeHist(gray)
@@ -73,17 +73,18 @@ def detect_faces(image: np.ndarray,
     rects.extend([tuple(map(int, p)) for p in profiles])
 
     if not rects:
-        return []
+        return [], 0.0
 
     # merge overlapping rects (simple union for overlapping detections)
     merged = _merge_rects(rects, iou_threshold=iou_threshold)
+    confidence = _compute_confidence(merged, image.shape)
 
     # optionally expand bbox upward/sideways to cover full head and hats
     if expand_head:
         expanded = [_expand_bbox(r, image.shape, expand_top_ratio, expand_lr_ratio) for r in merged]
-        return [tuple(map(int, r)) for r in expanded]
+        return [tuple(map(int, r)) for r in expanded], confidence
 
-    return [tuple(map(int, r)) for r in merged]
+    return [tuple(map(int, r)) for r in merged], confidence
 
 
 def _expand_bbox(bbox: Tuple[int, int, int, int], image_shape: tuple, top_ratio: float, lr_ratio: float) -> Tuple[int, int, int, int]:
@@ -154,6 +155,33 @@ def _rect_iou(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -> flo
     if union == 0:
         return 0.0
     return inter_area / union
+
+
+def _compute_confidence(rects: List[Tuple[int, int, int, int]], image_shape: tuple) -> float:
+    """Hitung confidence score sederhana berdasarkan ukuran relatif deteksi wajah."""
+    if not rects:
+        return 0.0
+    img_h, img_w = image_shape[0], image_shape[1]
+    image_area = max(1, img_w * img_h)
+
+    # Rasio luas rata-rata bbox terhadap luas gambar
+    ratios = []
+    for x, y, w, h in rects:
+        box_area = max(1, w * h)
+        ratios.append(box_area / image_area)
+
+    avg_ratio = sum(ratios) / len(ratios)
+
+    # size_score: lebih besar jika bbox relatif cukup besar (baseline ~0.8%)
+    size_score = min(1.0, avg_ratio / 0.008)
+
+    # face_count_factor: memberi poin lebih jika sejumlah wajah terdeteksi (0..5+)
+    face_count_factor = min(1.0, len(rects) / 5.0)
+
+    # Kombinasi heuristik — ukuran lebih penting, jumlah juga berkontribusi
+    confidence = size_score * 0.6 + face_count_factor * 0.4
+
+    return float(round(min(max(confidence * 100.0, 0.0), 100.0), 1))
 
 
 def draw_face_boxes(image: np.ndarray, faces: list, color=(0, 255, 0), thickness=2) -> np.ndarray:

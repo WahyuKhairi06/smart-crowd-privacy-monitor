@@ -108,7 +108,7 @@ if uploaded_file is not None:
         # --- Output Cards ---
         section_title("📊", "Hasil Analisis")
 
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
 
         with c1:
             st.markdown(
@@ -143,6 +143,18 @@ if uploaded_file is not None:
                     <div style="font-size:13px; color:#2BA8A2; font-weight:700;">WAKTU ANALISIS</div>
                     <div style="font-size:16px; font-weight:700; color:#1E8C86; margin-top:6px;">
                         {readable_timestamp()}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with c4:
+            st.markdown(
+                f"""
+                <div class="flip7-card">
+                    <div style="font-size:13px; color:#2BA8A2; font-weight:700;">CONFIDENCE SCORE</div>
+                    <div style="font-size:16px; font-weight:700; color:#1E8C86; margin-top:6px;">
+                        {result['confidence']}%
                     </div>
                 </div>
                 """,

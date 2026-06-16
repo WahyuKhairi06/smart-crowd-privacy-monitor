@@ -40,7 +40,7 @@ def process_image(cv2_image, original_filename: str, blur_strength: int = 51) ->
         }
     """
     # 1. Face Detection (Haar Cascade + profile) — expand boxes to cover heads/hats
-    faces = detect_faces(cv2_image, expand_head=True)
+    faces, confidence = detect_faces(cv2_image, expand_head=True)
 
     # 2. Gaussian Blur (Privacy Protection)
     protected_image = blur_faces(cv2_image, faces, blur_strength=blur_strength)
@@ -69,6 +69,7 @@ def process_image(cv2_image, original_filename: str, blur_strength: int = 51) ->
         "density_level": result["density_level"],
         "density_color": result["density_color"],
         "density_emoji": result["density_emoji"],
+        "confidence": confidence,
         "timestamp": ts,
         "saved_path": saved_path,
     }
