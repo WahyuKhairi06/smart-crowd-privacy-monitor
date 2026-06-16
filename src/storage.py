@@ -50,6 +50,21 @@ def load_history() -> pd.DataFrame:
 
 
 def clear_history() -> None:
-    """Menghapus seluruh histori (reset CSV)."""
+    """
+    Menghapus seluruh histori (reset CSV) dan menghapus semua file gambar dari server.
+    """
+    from src.utils import delete_image_file
+    
+    # Baca data lama untuk mendapatkan path gambar
+    try:
+        df = pd.read_csv(CSV_PATH)
+        # Hapus semua file gambar
+        if not df.empty:
+            for image_path in df["image_path"]:
+                delete_image_file(image_path)
+    except Exception as e:
+        print(f"Error saat membaca CSV untuk menghapus gambar: {e}")
+    
+    # Reset CSV
     df = pd.DataFrame(columns=COLUMNS)
     df.to_csv(CSV_PATH, index=False)

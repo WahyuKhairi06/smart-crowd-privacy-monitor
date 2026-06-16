@@ -37,11 +37,35 @@ def cv2_to_rgb(cv2_image):
     return cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB)
 
 
-def save_image(cv2_image, filename: str) -> str:
-    """Simpan gambar hasil proses ke outputs/images/ dan kembalikan path."""
+def save_image(cv2_image, filename: str, quality: int = 80) -> str:
+    """
+    Simpan gambar hasil proses ke outputs/images/ dengan kompresi dan kembalikan path.
+    
+    Parameters
+    ----------
+    cv2_image : np.ndarray
+        Gambar dalam format BGR (OpenCV).
+    filename : str
+        Nama file output.
+    quality : int
+        Kualitas JPEG (1-95). Default 80 untuk kompresi optimal.
+    
+    Returns
+    -------
+    str
+        Path file yang disimpan.
+    """
     ensure_dirs()
     path = os.path.join("outputs", "images", filename)
-    cv2.imwrite(path, cv2_image)
+    
+    # Convert BGR to RGB untuk Pillow
+    rgb_image = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB)
+    
+    # Gunakan Pillow untuk kompresi JPEG
+    from PIL import Image
+    pil_image = Image.fromarray(rgb_image)
+    pil_image.save(path, format='JPEG', quality=quality, optimize=True)
+    
     return path
 
 
@@ -49,3 +73,27 @@ def safe_filename(name: str) -> str:
     """Bersihkan nama file dari karakter tidak aman."""
     keep = "-_.() "
     return "".join(c for c in name if c.isalnum() or c in keep).strip()
+
+
+def delete_image_file(image_path: str) -> bool:
+    """
+    Hapus file gambar dari disk.
+    
+    Parameters
+    ----------
+    image_path : str
+        Path lengkap file gambar yang akan dihapus.
+    
+    Returns
+    -------
+    bool
+        True jika berhasil, False jika gagal atau file tidak ada.
+    """
+    try:
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            return True
+        return False
+    except Exception as e:
+        print(f"Error menghapus file {image_path}: {e}")
+        return False
