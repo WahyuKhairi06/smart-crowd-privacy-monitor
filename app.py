@@ -29,6 +29,18 @@ ensure_dirs()
 apply_flip7_theme()
 render_hero(ribbon="SMART CROWD PRIVACY MONITOR")
 
+# Tampilkan nama dan NIM di bawah judul
+st.markdown(
+    """
+    <div style="text-align:center; margin-bottom:24px;">
+        <p style="color:#1E8C86; font-size:14px; font-weight:500; margin:0;">
+            <b>Wahyu Khairi - 2311531009</b>
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.markdown(
     """
     <div style="text-align:center; max-width: 720px; margin: 0 auto 24px auto;
@@ -182,4 +194,5 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True,
+    
 )

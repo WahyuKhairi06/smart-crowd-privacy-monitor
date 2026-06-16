@@ -107,10 +107,26 @@ def density_pie_chart(history_df: pd.DataFrame) -> go.Figure:
                 values=counts.values,
                 marker=dict(colors=colors, line=dict(color=SURFACE_CARD, width=2)),
                 hole=0.45,
-                textinfo="label+percent",
-                textfont=dict(family=FONT_FAMILY, size=14, color=PRIMARY_DARK),
+                textinfo="none",
+                pull=[0.05, 0.05, 0.05],
+                hoverinfo="label+percent+value",
             )
         ]
+    )
+
+    fig.update_layout(
+        margin=dict(l=80, r=80, t=100, b=80),
+        legend=dict(
+            orientation="v",
+            yanchor="middle",
+            y=0.5,
+            xanchor="right",
+            x=0.98,
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor=PRIMARY_BG,
+            borderwidth=1,
+            font=dict(size=12),
+        ),
     )
 
     return _base_layout(fig, "Distribusi Tingkat Kepadatan (Histori)")
@@ -143,12 +159,16 @@ def history_line_chart(history_df: pd.DataFrame) -> go.Figure:
                     line=dict(color=PRIMARY_DARK, width=1),
                 ),
                 name="Jumlah Wajah",
-                hovertemplate="%{x}<br>Wajah: %{y}<extra></extra>",
+                hovertemplate="<b>%{x|%d %B %Y, %H:%M:%S}</b><br>Wajah: %{y}<extra></extra>",
             )
         )
 
     fig.update_yaxes(title="Jumlah Wajah", gridcolor=PRIMARY_BG, zerolinecolor=PRIMARY_BG)
-    fig.update_xaxes(title="Waktu", gridcolor=PRIMARY_BG)
+    fig.update_xaxes(
+        title="Waktu",
+        gridcolor=PRIMARY_BG,
+        tickformat="%d %b<br>%H:%M",
+    )
 
     return _base_layout(fig, "Tren Histori Analisis Kepadatan")
 

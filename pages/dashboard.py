@@ -33,9 +33,20 @@ total_wajah = int(history_df["face_count"].sum()) if not history_df.empty else 0
 avg_wajah = round(history_df["face_count"].mean(), 1) if not history_df.empty else 0.0
 
 if not history_df.empty:
-    most_common_level = history_df["density_level"].mode().iloc[0]
+    most_common_level = history_df["density_level"].mode().iloc[0] if not history_df["density_level"].mode().empty else "-"
+    # Tanggal input pertama dan terakhir
+    min_timestamp = history_df["timestamp"].min()
+    max_timestamp = history_df["timestamp"].max()
+    
+    if pd.notna(min_timestamp) and pd.notna(max_timestamp):
+        first_date = min_timestamp.strftime("%d %B %Y")
+        latest_date = max_timestamp.strftime("%d %B %Y")
+        date_range_text = f"📅 Dari: {first_date} | Terakhir: {latest_date}"
+    else:
+        date_range_text = "📅 Belum ada data"
 else:
     most_common_level = "-"
+    date_range_text = "📅 Belum ada data"
 
 m1, m2, m3, m4 = st.columns(4)
 
@@ -61,6 +72,19 @@ with m4:
         """,
         unsafe_allow_html=True,
     )
+
+# Tampilkan tanggal di bawah statistik
+st.markdown(
+    f"""
+    <div style="background:#E8F6F5; border-radius:12px; padding:12px 16px; 
+                margin-top:16px; border-left:4px solid #2BA8A2; text-align:center;">
+        <div style="font-size:14px; color:#1E8C86; font-weight:500;">
+            {date_range_text}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.markdown("---")
 
